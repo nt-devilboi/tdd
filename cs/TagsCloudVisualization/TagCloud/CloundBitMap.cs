@@ -6,14 +6,17 @@ namespace TagsCloudVisualization;
 public class CloundBitMap : ITagCloudImage
 {
     private readonly Bitmap bitmap;
-    private readonly string path;
+    private readonly string filePath;
     private readonly Graphics graphics;
-    public CloundBitMap(int width, int height, string path)
+
+    public CloundBitMap(int width, int height, string filePath)
     {
+        if (Directory.Exists(this.filePath)) throw new DirectoryNotFoundException();
+
         bitmap = new Bitmap(width, height);
         graphics = Graphics.FromImage(bitmap);
         graphics.Clear(Color.Black);
-        this.path = path;
+        this.filePath = filePath;
     }
 
 
@@ -25,15 +28,9 @@ public class CloundBitMap : ITagCloudImage
         graphics.DrawRectangle(red, rec);
     }
 
-    public void DrawBackGround()
-    {
-        graphics.Clear(Color.Black);
-        graphics.Dispose();
-    }
-
     public void Save()
     {
-        bitmap.Save(path, ImageFormat.Png);
+        bitmap.Save(filePath, ImageFormat.Png);
     }
 
     public void Dispose()

@@ -4,21 +4,34 @@ namespace TagsCloudVisualization;
 
 public class CircularCloudLayouter : ICloudLayouter
 {
-    private Point lastPos;
-
-    private readonly List<Rectangle> rectangles; // типо паттерн лекговес, но не он.
-
-    // но сейчас есть косяк в том, что сам лист создаёт пользователь. то есть у него изнчально власть над листом и он после добавление в этот класс может его как-то менять или даже удалить.
+    private readonly List<Rectangle> rectangles; 
     private double angle;
     private const double A = 1;
 
-    public CircularCloudLayouter(Point center, List<Rectangle> rectangles) : base(rectangles)
+    public CircularCloudLayouter(Point center)
     {
         CheckValid(center);
-
-        lastPos = center;
-        this.rectangles = rectangles;
+        rectangles = new List<Rectangle>();
         Start = center;
+    }
+
+    public Point Start { get; set; }
+
+    public Rectangle PutNextRectangle(Size rectangleSize)
+    {
+        var rec = Rectangle.Empty;
+        do
+        {
+            angle += Math.PI / 14;
+            var radius = A * angle;
+            var x = (int)(Start.X + radius * Math.Cos(angle));
+            var y = (int)(Start.Y + radius * Math.Sin(angle));
+            rec = new Rectangle(new Point(x, y), rectangleSize);
+        } while (AnyIntersectWithRec(rec));
+
+        TryMoveToCenter(ref rec);
+        rectangles.Add(rec);
+        return rec;
     }
 
     private void CheckValid(Point center)
@@ -26,36 +39,42 @@ public class CircularCloudLayouter : ICloudLayouter
         if (center.X < 0) throw new ArgumentException("X has value less than 0");
         if (center.Y < 0) throw new ArgumentException("Y has value less than 0");
     }
-
-    protected override Rectangle GetNewRec(Size rectangleSize)
+    
+    private void TryMoveToCenter(ref Rectangle rec)
     {
-        var rec = Rectangle.Empty;
-        do
+        while (true)
         {
-            angle += Math.PI / 4;
-            var radius = A * angle;
-            var x = (int)(lastPos.X + radius * Math.Cos(angle));
-            var y = (int)(lastPos.Y + radius * Math.Sin(angle));
-            rec = new Rectangle(new Point(x, y), rectangleSize);
-        } while (IntersectWithRec(rec));
+            var isMoved = false;
+            if (Start.Y - rec.Bottom > 2 && !AnyIntersectWithRec(rec.NewWithOffSet(0, +2)))
+            {
+                rec.Y += 1;
+                isMoved = true;
+            }
 
-        TryMoveToFreeSpace(ref rec);
-        lastPos = rec.Location;
-        rectangles.Add(rec);
-        return rec;
+            if (rec.Top - Start.Y > 2 && !AnyIntersectWithRec(rec.NewWithOffSet(0, -2)))
+            {
+                rec.Y -= 1;
+                isMoved = true;
+            }
+
+            if (rec.Left - Start.X > 2 && !AnyIntersectWithRec(rec.NewWithOffSet(-2, +2)))
+            {
+                rec.X -= 1;
+                isMoved = true;
+            }
+
+            if (Start.X - rec.Right > 2 && !AnyIntersectWithRec(rec.NewWithOffSet(+2)))
+            {
+                rec.X += 1;
+                isMoved = true;
+            }
+
+            if (!isMoved) break;
+        }
     }
 
-    private void TryMoveToFreeSpace(ref Rectangle rec)
-    {
-        while (Start.Y - rec.Bottom > 2 && !IntersectWithRec(rec.NewWithOffSet(0, +2))) rec.Y += 1;
-        while (rec.Top - Start.Y > 2 && !IntersectWithRec(rec.NewWithOffSet(0, -2))) rec.Y -= 1;
-        while (rec.Left - Start.X > 2 && !IntersectWithRec(rec.NewWithOffSet(-2, +2))) rec.X -= 1;
-        while (Start.X - rec.Right > 2 && !IntersectWithRec(rec.NewWithOffSet(+2))) rec.X += 1;
-    }
-
-    private bool IntersectWithRec(Rectangle rec)
+    private bool AnyIntersectWithRec(Rectangle rec)
     {
         return rectangles.Any(rectangle => rectangle.IntersectsWith(rec));
     }
 }
-// как будто ttd удобно в том случае, когда не ты не можешь увидеть всё решение сразу, и постепенно пишешь тесты и реализуешь по под задачам логику.
