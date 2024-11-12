@@ -9,11 +9,3 @@ using var tagImage = new CloundBitMap(1000, 1000, "./../../../photos/notIntersec
 using var tagCloud = new TagCloud(circularCloudLayouter, tagImage);
 tagCloud.GenerateCloud(200,25, 50);
 tagCloud.Save();
-
-var rec = new Rectangle();
-
-rec.Offset(3, 0);
-var x = rec.СopyWithOffSet(3);
-Console.WriteLine($"offset и NewOffSet {rec.ToString()}");
-Console.WriteLine($"NewOfSetOffset  {x.ToString()}");
-

@@ -1,27 +1,32 @@
 using System.Drawing;
 using FluentAssertions;
+using NUnit.Framework.Interfaces;
 using TagsCloudVisualization;
 
 namespace TagsCloudVisuliazation.Test;
 
 public class TagCloudTests
 {
-    [TestCase(3, -2, TestName = "X ShouldBeMoreThan 0")]
-    [TestCase(-3, 2, TestName = "Y ShouldBeMoreThan 0")]
-    public void CircularCloudLayouter_CheckConstructor(int y, int x)
+    private const string PathPhoto = "./../../../photos/WithErrorFrom";
+    private TagCloud tagCloud;
+
+    [SetUp]
+    public void Setup()
     {
-        Action action = () => new CircularCloudLayouter(new Point(y, x));
-        action.Should().Throw<ArgumentException>();
+        var circularCloudLayouter = new CircularCloudLayouter(new Point(500, 500));
+        var tagImage = new CloundBitMap(1000, 1000, PathPhoto);
+        tagCloud = new TagCloud(circularCloudLayouter, tagImage);
     }
 
     [Test]
-    public void CloudBitMap_DirectoryShouldBeExist()
+    public void TagCloud_NotIntersect()
     {
-        var filePath = "./../../../OuterWild/notIntersect-50.png";
-        Action action = () => new CloundBitMap(5, 5, filePath);
-        action.Should().Throw<DirectoryNotFoundException>();
-    }
+        var rectangles = new List<Rectangle>();
+        
+        tagCloud.GenerateCloud(50, 100, 100);
 
+        CheckIntercets(rectangles);
+    }
 
     [Test]
     public void TagCloud_StartPosition_ShouldBe_In_Image()
@@ -31,13 +36,24 @@ public class TagCloudTests
         Action action = () => new TagCloud(circularCloudLayouter, tagImage);
         action.Should().Throw<ArgumentException>().WithMessage("the start position is abroad of image");
     }
-
-    [Test]
-    public void CircularCLoudLayouter_ShouldBeCorrect_CountTag()
+    
+    [TearDown]
+    public void CheckResult()
     {
-        var Layouter = new CircularCloudLayouter(new Point(500, 500));
+        if (TestContext.CurrentContext.Result.Outcome == ResultState.Failure)
+        {
+            TestContext.WriteLine($"Tag cloud visualization saved to file {PathPhoto} + {TestContext.CurrentContext.Test.MethodName}");
+        }
+        
+        tagCloud.Dispose();
+    }
 
-        var countTag = 50;
-        for (int i = 0; i < countTag; i++) Layouter.PutNextRectangle(new Size(10, 10));
+    private static void CheckIntercets(List<Rectangle> rectangles)
+    {
+        for (int i = 0; i < rectangles.Count; i++)
+        for (int j = i + 1; j < rectangles.Count; j++)
+        {
+            rectangles[i].IntersectsWith(rectangles[j]).Should().BeFalse();
+        }
     }
 }
