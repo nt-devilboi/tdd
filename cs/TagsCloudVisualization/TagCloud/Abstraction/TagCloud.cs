@@ -22,12 +22,12 @@ public class TagCloud : IDisposable
         if (cloudLayouter.Start.Y > tagCloudImage.Size().Height ||
             cloudLayouter.Start.X > tagCloudImage.Size().Width)
         {
-            throw new ArgumentException("start hides over image"); 
+            throw new ArgumentException("the start position is abroad of image"); 
         }
     }
 
     // было красиво было бы если, в аргументах принимали бы массив tags, по их популярности, а не random, но по задачи этого делать не нужно
-    public void Create(int countTag, int minSize, int maxSize)
+    public void GenerateCloud(int countTag, int minSize, int maxSize)
     {
         for (int i = 0; i < countTag; i++)
         {
@@ -47,6 +47,4 @@ public class TagCloud : IDisposable
     {
         tagCloudImage.Dispose();
     }
-
-
 }
