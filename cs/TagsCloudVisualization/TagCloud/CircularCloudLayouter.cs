@@ -11,7 +11,7 @@ public class CircularCloudLayouter : ICloudLayouter
 
     public CircularCloudLayouter(Point center)
     {
-        CheckValid(center);
+        validate(center);
         rectangles = new List<Rectangle>();
         Start = center;
     }
@@ -30,18 +30,18 @@ public class CircularCloudLayouter : ICloudLayouter
             rec = new Rectangle(new Point(x, y), rectangleSize);
         } while (AnyIntersectWithRec(rec));
 
-        if (rectangles.Count != 0) rec = MoveToFreeSpace(rec);
+        if (rectangles.Count != 0) rec = Sealing(rec);
         rectangles.Add(rec);
         return rec;
     }
 
-    private void CheckValid(Point center)
+    private void validate(Point center)
     {
         if (center.X < 0) throw new ArgumentException("X has value less than 0");
         if (center.Y < 0) throw new ArgumentException("Y has value less than 0");
     }
 
-    private Rectangle MoveToFreeSpace(Rectangle rec)
+    private Rectangle Sealing(Rectangle rec)
     {
         while (Start.Y - rec.Bottom > 1 && !AnyIntersectWithRec(rec with { Y = rec.Y + 2 })) rec.Y += 1;
         while (rec.Top - Start.Y > 1 && !AnyIntersectWithRec(rec with { Y = rec.Y - 2 })) rec.Y -= 1;
