@@ -6,7 +6,8 @@ public class CircularCloudLayouter : ICloudLayouter
 {
     private readonly List<Rectangle> rectangles;
     private double angle;
-    private const double A = 1;
+    private const double CoefficientRadius = 1.3;
+    private const int CoefficientAngle = 14;
 
     public CircularCloudLayouter(Point center)
     {
@@ -22,14 +23,14 @@ public class CircularCloudLayouter : ICloudLayouter
         var rec = Rectangle.Empty;
         do
         {
-            angle += Math.PI / 14;
-            var radius = A * angle;
+            angle += Math.PI / CoefficientAngle;
+            var radius = CoefficientRadius * angle;
             var x = (int)(Start.X + radius * Math.Cos(angle));
             var y = (int)(Start.Y + radius * Math.Sin(angle));
             rec = new Rectangle(new Point(x, y), rectangleSize);
         } while (AnyIntersectWithRec(rec));
 
-        TryMoveToCenter(ref rec);
+        if (rectangles.Count != 0) rec = MoveToFreeSpace(rec);
         rectangles.Add(rec);
         return rec;
     }
@@ -40,13 +41,15 @@ public class CircularCloudLayouter : ICloudLayouter
         if (center.Y < 0) throw new ArgumentException("Y has value less than 0");
     }
 
-    private void TryMoveToCenter(ref Rectangle rec)
+    private Rectangle MoveToFreeSpace(Rectangle rec)
     {
-        while (Start.Y - rec.Bottom > 2 && !AnyIntersectWithRec(rec.СopyWithOffSet(0, +2))) rec.Y += 1;
-        while (rec.Top - Start.Y > 2 && !AnyIntersectWithRec(rec.СopyWithOffSet(0, -2))) rec.Y -= 1;
-        while (rec.Left - Start.X > 2 && !AnyIntersectWithRec(rec.СopyWithOffSet(-2))) rec.X -= 1;
-        while (Start.X - rec.Right > 2 && !AnyIntersectWithRec(rec.СopyWithOffSet(+2))) rec.X += 1;
-     }
+        while (Start.Y - rec.Bottom > 1 && !AnyIntersectWithRec(rec with { Y = rec.Y + 2 })) rec.Y += 1;
+        while (rec.Top - Start.Y > 1 && !AnyIntersectWithRec(rec with { Y = rec.Y - 2 })) rec.Y -= 1;
+        while (rec.Left - Start.X > 1 && !AnyIntersectWithRec(rec with { X = rec.X - 2 })) rec.X -= 1;
+        while (Start.X - rec.Right > 1 && !AnyIntersectWithRec(rec with { X = rec.X + 2 })) rec.X += 1;
+
+        return rec;
+    }
 
     private bool AnyIntersectWithRec(Rectangle rec)
     {
