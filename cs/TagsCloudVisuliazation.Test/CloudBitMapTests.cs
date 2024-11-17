@@ -1,4 +1,5 @@
 using System.Drawing;
+using System.Net;
 using FluentAssertions;
 using TagsCloudVisualization;
 
@@ -22,4 +23,15 @@ public class CloudBitMapTests
         action.Should().Throw<ArgumentException>();
     }
 
+    [Test]
+    public void CloudBitMap_ShouldBe_CreatePhoto()
+    {
+        var filePath = "./../../../photos/test_create_photo.png";
+        var cloudBitMap = new CloundBitMap(30, 300, filePath);
+        
+        cloudBitMap.Save();
+        File.Exists(filePath).Should().BeTrue();
+
+        File.Delete(filePath);
+    }
 }

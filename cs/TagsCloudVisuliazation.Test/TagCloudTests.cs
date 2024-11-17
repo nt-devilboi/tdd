@@ -19,7 +19,7 @@ public class TagCloudTests
     }
 
     [Test]
-    public void TagCloud_NotIntersect()
+    public void CreateTagCloud_WithoutIntersect()
     {
         var rectangles = new List<Rectangle>();
         
@@ -40,9 +40,11 @@ public class TagCloudTests
     [TearDown]
     public void CheckResult()
     {
-        if (TestContext.CurrentContext.Result.Outcome == ResultState.Failure)
+        if (TestContext.CurrentContext.Result.Outcome == ResultState.Failure && 
+            TestContext.CurrentContext.Test.MethodName!.StartsWith("Create"))
         {
-            TestContext.WriteLine($"Tag cloud visualization saved to file {PathPhoto} + {TestContext.CurrentContext.Test.MethodName}");
+            TestContext.WriteLine($"Tag cloud visualization saved to file {PathPhoto}/" +
+                                  $" {TestContext.CurrentContext.Test.MethodName}");
         }
         
         tagCloud.Dispose();
