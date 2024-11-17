@@ -8,8 +8,12 @@ namespace TagsCloudVisualization;
 public class TagCloud : IDisposable
 {
     private readonly ICloudLayouter cloudLayouter;
-    private readonly ITagCloudImage tagCloudImage; // ему по сути, не очень нужно знать ничего про rectangles - он только рисует остальное ему знать не нужно
-    
+
+    private readonly ITagCloudImage
+        tagCloudImage; // ему по сути, не очень нужно знать ничего про rectangles - он только рисует остальное ему знать не нужно
+
+    private bool IsDisposed;
+
     public TagCloud(ICloudLayouter cloudLayouter, ITagCloudImage tagCloudImage)
     {
         Validate(cloudLayouter, tagCloudImage);
@@ -17,19 +21,18 @@ public class TagCloud : IDisposable
         this.tagCloudImage = tagCloudImage;
     }
 
-    public void Validate(ICloudLayouter cloudLayouter, ITagCloudImage tagCloudImage)
+
+    private static void Validate(ICloudLayouter cloudLayouter, ITagCloudImage tagCloudImage)
     {
         if (cloudLayouter.Start.Y > tagCloudImage.Size().Height ||
             cloudLayouter.Start.X > tagCloudImage.Size().Width)
-        {
-            throw new ArgumentException("the start position is abroad of image"); 
-        }
+            throw new ArgumentException("the start position is abroad of image");
     }
 
     // было красиво было бы если, в аргументах принимали бы массив tags, по их популярности, а не random, но по задачи этого делать не нужно
     public void GenerateCloud(int countTag, int minSize, int maxSize)
     {
-        for (int i = 0; i < countTag; i++)
+        for (var i = 0; i < countTag; i++)
         {
             var width = Random.Shared.Next(minSize, maxSize);
             var height = Random.Shared.Next(minSize, maxSize);
@@ -37,14 +40,35 @@ public class TagCloud : IDisposable
             tagCloudImage.Draw(rec);
         }
     }
-    
+
     public void Save()
     {
         tagCloudImage.Save();
     }
 
+    ~TagCloud()
+    {
+        Dispose(false);
+    }
+
     public void Dispose()
     {
-        tagCloudImage.Dispose();
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    private void Dispose(bool fromMethod)
+    {
+        if (!IsDisposed)
+        {
+            if (fromMethod)
+            {
+                // потенциально это может в будущем пригодится, еще есть tag 2 и 3.
+            }
+
+            tagCloudImage.Dispose();
+
+            IsDisposed = true;
+        }
     }
 }

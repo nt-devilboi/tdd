@@ -14,7 +14,7 @@ public class TagCloudTests
     public void Setup()
     {
         var circularCloudLayouter = new CircularCloudLayouter(new Point(500, 500));
-        var tagImage = new CloundBitMap(1000, 1000, PathPhoto);
+        var tagImage = new CloudBitMap(1000, 1000, PathPhoto);
         tagCloud = new TagCloud(circularCloudLayouter, tagImage);
     }
 
@@ -32,7 +32,7 @@ public class TagCloudTests
     public void TagCloud_StartPosition_ShouldBe_In_Image()
     {
         var circularCloudLayouter = new CircularCloudLayouter(new Point(6, 3));
-        var tagImage = new CloundBitMap(5, 5, "./../../../photos/ph");
+        var tagImage = new CloudBitMap(5, 5, "./../../../photos/ph");
         Action action = () => new TagCloud(circularCloudLayouter, tagImage);
         action.Should().Throw<ArgumentException>().WithMessage("the start position is abroad of image");
     }

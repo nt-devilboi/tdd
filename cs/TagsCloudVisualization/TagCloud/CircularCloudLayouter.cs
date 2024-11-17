@@ -4,19 +4,19 @@ namespace TagsCloudVisualization;
 
 public class CircularCloudLayouter : ICloudLayouter
 {
-    private readonly List<Rectangle> rectangles;
-    private double angle;
     private const double CoefficientRadius = 1.3;
     private const int CoefficientAngle = 14;
+    private readonly List<Rectangle> rectangles;
+    private double angle;
 
     public CircularCloudLayouter(Point center)
     {
-        validate(center);
-        rectangles = new List<Rectangle>();
+        Validate(center);
+        rectangles = [];
         Start = center;
     }
 
-    public Point Start { get; set; }
+    public Point Start { get; }
 
     public Rectangle PutNextRectangle(Size rectangleSize)
     {
@@ -35,7 +35,7 @@ public class CircularCloudLayouter : ICloudLayouter
         return rec;
     }
 
-    private void validate(Point center)
+    private static void Validate(Point center)
     {
         if (center.X < 0) throw new ArgumentException("X has value less than 0");
         if (center.Y < 0) throw new ArgumentException("Y has value less than 0");
