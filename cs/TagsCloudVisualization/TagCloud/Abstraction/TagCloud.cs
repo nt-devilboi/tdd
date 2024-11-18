@@ -9,9 +9,8 @@ public class TagCloud : IDisposable
 {
     private readonly ICloudLayouter cloudLayouter;
 
-    private readonly ITagCloudImage
-        tagCloudImage; // ему по сути, не очень нужно знать ничего про rectangles - он только рисует остальное ему знать не нужно
-
+    private readonly ITagCloudImage tagCloudImage;
+    
     private bool IsDisposed;
 
     public TagCloud(ICloudLayouter cloudLayouter, ITagCloudImage tagCloudImage)
@@ -46,15 +45,9 @@ public class TagCloud : IDisposable
         tagCloudImage.Save();
     }
 
-    ~TagCloud()
-    {
-        Dispose(false);
-    }
-
     public void Dispose()
     {
         Dispose(true);
-        GC.SuppressFinalize(this);
     }
 
     private void Dispose(bool fromMethod)

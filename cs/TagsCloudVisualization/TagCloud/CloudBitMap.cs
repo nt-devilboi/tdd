@@ -33,11 +33,7 @@ public class CloudBitMap : ITagCloudImage
         bitmap.Save(filePath, ImageFormat.Png);
     }
 
-    ~CloudBitMap()
-    {
-        Dispose(false);
-    }
-
+    
     private static void Validate(string filePath, int width, int height)
     {
         if (!Directory.Exists(Path.GetDirectoryName(filePath))) throw new DirectoryNotFoundException();
@@ -47,7 +43,6 @@ public class CloudBitMap : ITagCloudImage
     public void Dispose()
     {
         Dispose(true);
-        GC.SuppressFinalize(this);
     }
 
     private void Dispose(bool fromMethod)
