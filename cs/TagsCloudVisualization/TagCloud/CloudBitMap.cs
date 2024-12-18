@@ -1,5 +1,6 @@
 using System.Drawing;
 using System.Drawing.Imaging;
+using TagCloud2;
 
 namespace TagsCloudVisualization;
 
@@ -10,15 +11,16 @@ public class CloudBitMap : ITagCloudImage
     private readonly Graphics graphics;
     private readonly Pen pen = new(Color.Red);
     private bool IsDisposed;
+    private bool IsSave;
 
-    public CloudBitMap(int width, int height, string filePath)
+    public CloudBitMap(SettingsTagCloud settingsTagCloud)
     {
-        Validate(filePath, width, height);
+        Validate(settingsTagCloud.PathDirectory, settingsTagCloud.Size.Width, settingsTagCloud.Size.Height);
 
-        bitmap = new Bitmap(width, height);
+        bitmap = new Bitmap(settingsTagCloud.Size.Width, settingsTagCloud.Size.Height);
         graphics = Graphics.FromImage(bitmap);
         graphics.Clear(Color.Black);
-        this.filePath = filePath;
+        filePath = settingsTagCloud.PathDirectory;
     }
 
     public Size Size() => bitmap.Size;
@@ -28,15 +30,37 @@ public class CloudBitMap : ITagCloudImage
         graphics.DrawRectangle(pen, rec);
     }
 
-    public void Save()
+    public void Draw(RectangleTagCloud rec)
     {
-        bitmap.Save(filePath, ImageFormat.Png);
+        graphics.DrawString(rec.text, rec.font, Brushes.Blue, rec.Rectangle);
+
+        graphics.DrawRectangle(pen, rec.Rectangle);
     }
 
-    
+    public SizeF GetSizeWord(WordPopular word)
+    {
+        return graphics.MeasureString(word.Word, new Font("Aria", 24, FontStyle.Bold));
+    }
+
+    public void Save()
+    {
+        if (IsSave)
+        {
+            Console.WriteLine("уже сохранена");
+            return;
+        }
+
+        var saveFilePath = string.Join("",filePath, $"/tagCloud-({bitmap.Height},{bitmap.Width}).png");
+        bitmap.Save(saveFilePath, ImageFormat.Png);
+        Console.WriteLine($"file saved in {saveFilePath}");
+        IsSave = true;
+    }
+
+
     private static void Validate(string filePath, int width, int height)
     {
-        if (!Directory.Exists(Path.GetDirectoryName(filePath))) throw new DirectoryNotFoundException();
+        if (!Directory.Exists(filePath)) throw new DirectoryNotFoundException($"not correct path {filePath}");
+        if (filePath[^1] == '/') throw new ArgumentException("PathShouldBeWithout \"\\\"");
         if (width <= 0 || height <= 0) throw new ArgumentException("size of image should be with positive number");
     }
 
@@ -51,14 +75,13 @@ public class CloudBitMap : ITagCloudImage
         {
             if (fromMethod)
             {
-                // представим, что здесь интерфейс логера. как будто гибкая штука)
-                Console.WriteLine($"file saved in {filePath}");
+                Save();
             }
 
             bitmap.Dispose();
             graphics.Dispose();
             pen.Dispose();
-            
+
             IsDisposed = true;
         }
     }

@@ -1,4 +1,5 @@
 using System.Drawing;
+using TagCloud2;
 
 namespace TagsCloudVisualization;
 
@@ -10,7 +11,7 @@ public class TagCloud : IDisposable
     private readonly ICloudLayouter cloudLayouter;
 
     private readonly ITagCloudImage tagCloudImage;
-    
+
     private bool IsDisposed;
 
     public TagCloud(ICloudLayouter cloudLayouter, ITagCloudImage tagCloudImage)
@@ -29,14 +30,16 @@ public class TagCloud : IDisposable
     }
 
     // было красиво было бы если, в аргументах принимали бы массив tags, по их популярности, а не random, но по задачи этого делать не нужно
-    public void GenerateCloud(int countTag, int minSize, int maxSize)
+    public void GenerateCloud(List<WordPopular> words)
     {
-        for (var i = 0; i < countTag; i++)
+        for (var i = 0; i < words.Count; i++)
         {
-            var width = Random.Shared.Next(minSize, maxSize);
-            var height = Random.Shared.Next(minSize, maxSize);
-            var rec = cloudLayouter.PutNextRectangle(new Size(width, height));
-            tagCloudImage.Draw(rec);
+            var sizeF = tagCloudImage.GetSizeWord(words[i]);
+            var size = (sizeF with { Height = sizeF.Height, Width = sizeF.Width + 10}).ToSize();
+            
+            var rec = cloudLayouter.PutNextRectangle(size);
+            var RecCloud = new RectangleTagCloud(rec, words[i].Word);
+            tagCloudImage.Draw(RecCloud);
         }
     }
 
