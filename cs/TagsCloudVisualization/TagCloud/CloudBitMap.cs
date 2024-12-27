@@ -10,11 +10,13 @@ public class CloudBitMap : ITagCloudImage
     private readonly string filePath;
     private readonly Graphics graphics;
     private readonly Pen pen = new(Color.Red);
-    private bool IsDisposed;
-    private bool IsSave;
+    private bool isDisposed;
+    private bool isSave;
+    private string nameFile;
 
-    public CloudBitMap(SettingsTagCloud settingsTagCloud)
+    public CloudBitMap(SettingsTagCloud settingsTagCloud, string nameFile)
     {
+        this.nameFile = nameFile;
         Validate(settingsTagCloud.PathDirectory, settingsTagCloud.Size.Width, settingsTagCloud.Size.Height);
 
         bitmap = new Bitmap(settingsTagCloud.Size.Width, settingsTagCloud.Size.Height);
@@ -44,16 +46,16 @@ public class CloudBitMap : ITagCloudImage
 
     public void Save()
     {
-        if (IsSave)
+        if (isSave)
         {
             Console.WriteLine("уже сохранена");
             return;
         }
 
-        var saveFilePath = string.Join("",filePath, $"/tagCloud-({bitmap.Height},{bitmap.Width}).png");
+        var saveFilePath = string.Join("",filePath, $"/tagCloud-({nameFile}).png");
         bitmap.Save(saveFilePath, ImageFormat.Png);
         Console.WriteLine($"file saved in {saveFilePath}");
-        IsSave = true;
+        isSave = true;
     }
 
 
@@ -71,7 +73,7 @@ public class CloudBitMap : ITagCloudImage
 
     private void Dispose(bool fromMethod)
     {
-        if (!IsDisposed)
+        if (!isDisposed)
         {
             if (fromMethod)
             {
@@ -82,7 +84,7 @@ public class CloudBitMap : ITagCloudImage
             graphics.Dispose();
             pen.Dispose();
 
-            IsDisposed = true;
+            isDisposed = true;
         }
     }
 }
